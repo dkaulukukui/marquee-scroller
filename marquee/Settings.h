@@ -52,6 +52,7 @@ SOFTWARE.
 #include "OctoPrintClient.h"
 #include "BitcoinApiClient.h"
 #include "PiHoleClient.h"
+#include "SurfReport.h"  
 
 //******************************
 // Start Settings
