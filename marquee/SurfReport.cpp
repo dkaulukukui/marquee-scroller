@@ -92,10 +92,10 @@ String SurfReport::getSurfReport()
     return (unsigned long) root["timestamp"];
   }
   */
- return "Surf Report String"
+ return "Surf Report String";
 }
 
 String SurfReport::getSpot()
 {
-    return mySpot
+    return mySpot;
 }
