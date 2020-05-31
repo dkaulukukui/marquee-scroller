@@ -29,8 +29,8 @@ SOFTWARE.
 #include <JsonStreamingParser.h> // --> https://github.com/squix78/json-streaming-parser
 #include <TimeLib.h> // https://github.com/PaulStoffregen/Time 
 
-const char * months[13] =  {"MMM", "JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"};
-const char * day_of_week[8] = {"DDD", "SUN ", "MON ", "TUE ", "WED ", "THU ", "FRI ", "SAT "};
+extern const char * months[];
+extern const char * day_of_week[];
 
 class SurfReport: public JsonListener {
   

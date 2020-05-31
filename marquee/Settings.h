@@ -119,6 +119,13 @@ int PiHolePort = 80;          // Port of your Pi-hole address (default 80)
 boolean ENABLE_OTA = true;    // this will allow you to load firmware to the device over WiFi (see OTA for ESP8266)
 String OTA_Password = "";     // Set an OTA password here -- leave blank if you don't want to be prompted for password
 
+//Surf Report 
+boolean SURF_ENABLED = true;
+String SURF_API_KEY = "723e0b9aaf2eae8d629f9996a93317eb"; //
+String SPOT_ID_south = "661";//south shore oahu (ala moana)
+String SPOT_ID_north = "616";//north shore oahu (pipeline)
+
+
 //******************************
 // End Settings
 //******************************

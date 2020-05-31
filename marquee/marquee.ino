@@ -97,10 +97,9 @@ ESP8266WebServer server(WEBSERVER_PORT);
 ESP8266HTTPUpdateServer serverUpdater;
 
 // Surf Client
-String SURF_API_KEY = "723e0b9aaf2eae8d629f9996a93317eb"; //
-String SPOT_ID_south = "661";//south shore oahu (ala moana)
-String SPOT_ID_north = "616";//north shore oahu (pipeline)
 SurfReport SurfReport(SURF_API_KEY, SPOT_ID_south);
+const char * months[13] =  {"MMM", "JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"};
+const char * day_of_week[8] = {"DDD", "SUN ", "MON ", "TUE ", "WED ", "THU ", "FRI ", "SAT "};
 
 static const char WEB_ACTIONS1[] PROGMEM = "<a class='w3-bar-item w3-button' href='/'><i class='fas fa-home'></i> Home</a>"
                         "<a class='w3-bar-item w3-button' href='/configure'><i class='fas fa-cog'></i> Configure</a>"
@@ -438,6 +437,10 @@ void loop() {
         if (piholeClient.getPiHoleStatus() != "") {
           msg += "    Pi-hole (" + piholeClient.getPiHoleStatus() + "): " + piholeClient.getAdsPercentageToday() + "% "; 
         }
+      }
+      if (SURF_ENABLED) {
+        SurfReport.updateSurf();
+        msg += SurfReport.format_report(1);
       }
 
       scrollMessage(msg);
