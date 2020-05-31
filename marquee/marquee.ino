@@ -96,6 +96,12 @@ BitcoinApiClient bitcoinClient;
 ESP8266WebServer server(WEBSERVER_PORT);
 ESP8266HTTPUpdateServer serverUpdater;
 
+// Surf Client
+String SURF_API_KEY = "723e0b9aaf2eae8d629f9996a93317eb"; //
+String SPOT_ID_south = "661";//south shore oahu (ala moana)
+String SPOT_ID_north = "616";//north shore oahu (pipeline)
+SurfReport SurfReport(SURF_API_KEY, SPOT_ID_south);
+
 static const char WEB_ACTIONS1[] PROGMEM = "<a class='w3-bar-item w3-button' href='/'><i class='fas fa-home'></i> Home</a>"
                         "<a class='w3-bar-item w3-button' href='/configure'><i class='fas fa-cog'></i> Configure</a>"
                         "<a class='w3-bar-item w3-button' href='/configurenews'><i class='far fa-newspaper'></i> News</a>";

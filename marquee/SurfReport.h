@@ -20,23 +20,61 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
+#ifndef SURFREPORT_INCLUDED
+#define SURFREPORT_INCLUDED
 
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
 #include <JsonListener.h>
 #include <JsonStreamingParser.h> // --> https://github.com/squix78/json-streaming-parser
+#include <TimeLib.h> // https://github.com/PaulStoffregen/Time 
 
-class SurfReport
-{
-  public:
-    SurfReport(String apiKey);
-    void updateConfig(String apiKey, String spot);
-    String getSurfReport();
-    String getSpot();
+const char * months[13] =  {"MMM", "JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"};
+const char * day_of_week[8] = {"DDD", "SUN ", "MON ", "TUE ", "WED ", "THU ", "FRI ", "SAT "};
 
+class SurfReport: public JsonListener {
+  
   private:
-    const char* servername = "api.timezonedb.com";  // remote server we will connect to
-    long localMillisAtUpdate;
     String myApiKey;
     String mySpot;
+
+    String currentKey = "";
+    String last_LVL_Key ="";
+    int counterReport = 0;
+    int nest_level = 0;
+    int dayReport = 0;
+
+    typedef struct {
+      String report_timestamp;
+      String wave_ht;
+      String wave_dir_deg;
+      String wave_dir_compass;
+      String wave_period;
+      String wind_sp;
+      String wind_dir_deg;
+      String wind_dir_compass;
+    } surffeed;
+
+    surffeed surf[5]; //store one report per day
+
+ public:
+    SurfReport(String apiKey, String spot);
+    void updateSurfSource(String apiKey, String spot);
+    void updateSurf();
+    String getSpot();
+    String format_report(int index);
+
+    String cleanText(String text);
+    
+    virtual void whitespace(char c);
+    virtual void startDocument();
+    virtual void key(String key);
+    virtual void value(String value);
+    virtual void endArray();
+    virtual void endObject();
+    virtual void endDocument();
+    virtual void startArray();
+    virtual void startObject();
 };
+
+#endif
