@@ -114,6 +114,7 @@ void SurfReport::value(String value) {
   //Serial.println("value: " + value);
   if (dayReport == 5) {
     // we are full so return
+    Serial.println("Returning from updateSurf");
     return;
   }
     if (nest_level == 1 && currentKey == "timestamp") {
@@ -143,7 +144,7 @@ void SurfReport::value(String value) {
       else if (currentKey == "compassDirection") {
         if(counterReport == 0 || counterReport == 8 || counterReport == 16 || counterReport == 24 || counterReport == 32){
           surf[dayReport].wave_dir_compass = value;
-          Serial.println(format_report(dayReport));
+          //Serial.println(format_report(dayReport));
           dayReport++;          
         }
         counterReport++;
