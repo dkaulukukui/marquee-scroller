@@ -45,7 +45,7 @@ void SurfReport::updateSurf() {
   //Replace with string for surf data to parse
   //String apiGetData = "http://" + String(servername) + "/v2/top-headlines?sources=" + mySource + "&apiKey=" + myApiKey;
   //String apiGetData = "https://www.surfline.com/surf-report/ala-moana-bowls/5842041f4e65fad6a7708b42";
-  String SURF_SOURCE = "http://magicseaweed.com/api/" + myApiKey + "/forecast/?spot_id=" + mySpot;//
+  String SURF_SOURCE = "http://magicseaweed.com/api/" + myApiKey + "/forecast/?spot_id=" + mySpot +"&fields=timestamp,swell.components.combined.*";//
 
   Serial.println("Getting Surf Data");
   Serial.println(SURF_SOURCE);
@@ -114,7 +114,7 @@ void SurfReport::value(String value) {
   //Serial.println("value: " + value);
   if (dayReport == 5) {
     // we are full so return
-    Serial.println("Returning from updateSurf");
+    //Serial.println("Returning from updateSurf");
     return;
   }
     if (nest_level == 1 && currentKey == "timestamp") {
@@ -184,7 +184,7 @@ String SurfReport::format_report(int index){
 
   report_date = day_of_week[dayOfWeek(time_raw)] + String(day(time_raw))+months[month(time_raw)]+String(year(time_raw));
 
-  report_string = "Surf Report for " + report_date + ": wave height is " + surf[index].wave_ht + "ft(face) from "+surf[index].wave_dir_compass;
+  report_string = report_date + " Height=" + surf[index].wave_ht + "ft(face) dir= "+surf[index].wave_dir_compass;
 
   return report_string;
 }

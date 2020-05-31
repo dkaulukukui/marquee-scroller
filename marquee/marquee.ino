@@ -97,7 +97,8 @@ ESP8266WebServer server(WEBSERVER_PORT);
 ESP8266HTTPUpdateServer serverUpdater;
 
 // Surf Client
-SurfReport SurfReport(SURF_API_KEY, SPOT_ID_south);
+SurfReport SurfReport1(SURF_API_KEY, SPOT_ID_south);
+SurfReport SurfReport2(SURF_API_KEY, SPOT_ID_north);
 const char * months[13] =  {"MMM", "JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"};
 const char * day_of_week[8] = {"DDD", "SUN ", "MON ", "TUE ", "WED ", "THU ", "FRI ", "SAT "};
 
@@ -352,7 +353,8 @@ void loop() {
   if ((getMinutesFromLastRefresh() >= minutesBetweenDataRefresh) || lastEpoch == 0) {
     getWeatherData();
     if (SURF_ENABLED) {  //update surf report at the same time as weather data 
-        SurfReport.updateSurf();
+        SurfReport1.updateSurf();
+        SurfReport2.updateSurf();
     }
   }
   checkDisplay(); // this will see if we need to turn it on or off for night mode.
@@ -442,7 +444,8 @@ void loop() {
         }
       }
       if (SURF_ENABLED) {
-        msg += SurfReport.format_report(0);
+        msg += " South shore surf for " + SurfReport1.format_report(0);
+        msg += " North shore surf for " + SurfReport2.format_report(0);
       }
 
       scrollMessage(msg);
