@@ -109,6 +109,7 @@ static const char WEB_ACTIONS1[] PROGMEM = "<a class='w3-bar-item w3-button' hre
 
 static const char WEB_ACTIONS2[] PROGMEM = "<a class='w3-bar-item w3-button' href='/configurebitcoin'><i class='fab fa-bitcoin'></i> Bitcoin</a>"
                         "<a class='w3-bar-item w3-button' href='/configurepihole'><i class='fas fa-network-wired'></i> Pi-hole</a>"
+                        "<a class='w3-bar-item w3-button' href='/configuresurf'><i class='fas fa-water'></i> Surf Report</a>"
                         "<a class='w3-bar-item w3-button' href='/pull'><i class='fas fa-cloud-download-alt'></i> Refresh Data</a>"
                         "<a class='w3-bar-item w3-button' href='/display'>";
 
@@ -204,6 +205,13 @@ static const char OCTO_FORM[] PROGMEM = "<form class='w3-container' action='/sav
                         "<button class='w3-button w3-block w3-green w3-section w3-padding' type='submit'>Save</button></form>"
                         "<script>function isNumberKey(e){var h=e.which?e.which:event.keyCode;return!(h>31&&(h<48||h>57))}</script>";
 
+static const char SURF_FORM[] PROGMEM =   "<form class='w3-container' action='/savesurf' method='get'><h2>Surf Report Configuration:</h2>"
+                        "<p><input name='displaysurfreport' class='w3-check w3-margin-top' type='checkbox' %SURFCHECKED%> Display Surf Report</p>"
+                        "<label>Surf API Key</label>"
+                        "<input class='w3-input w3-border w3-margin-bottom' type='text' name='SurfApiKey' value='%SURFKEY%' maxlength='60'>"
+                        "<p><input name='displaysurfreport_extended' class='w3-check w3-margin-top' type='checkbox' %EXT_SURFCHECKED%> Display Extended Surf Report</p>"                        
+                        "<p>Minutes Between Extended Forecast <input class='w3-border w3-margin-bottom' name='extsurfdelay' type='number' min='2' max='60' value='%EXT_SURF_DELAY%'></p>"
+                        "<button class='w3-button w3-block w3-grey w3-section w3-padding' type='submit'>Save</button></form>";
 
 
 const int TIMEOUT = 500; // 500 = 1/2 second
@@ -319,6 +327,7 @@ void setup() {
     server.on("/savenews", handleSaveNews);
     server.on("/saveoctoprint", handleSaveOctoprint);
     server.on("/savepihole", handleSavePihole);
+    server.on("/savesurf", handleSaveSurf);
     server.on("/systemreset", handleSystemReset);
     server.on("/forgetwifi", handleForgetWifi);
     server.on("/configure", handleConfigure);
@@ -327,6 +336,7 @@ void setup() {
     server.on("/configurenews", handleNewsConfigure);
     server.on("/configureoctoprint", handleOctoprintConfigure);
     server.on("/configurepihole", handlePiholeConfigure);
+    server.on("/configuresurf", handleSurfConfigure);
     server.on("/display", handleDisplay);
     server.onNotFound(redirectHome);
     serverUpdater.setup(&server, "/update", www_username, www_password);
@@ -452,7 +462,7 @@ void loop() {
           
           for(int i =1; i < 5; i++){
             msg += " South shore for " + SurfReport1.format_report(i, true);
-            msg += " North shore for " + SurfReport2.format_report(i, true)+;
+            msg += " North shore for " + SurfReport2.format_report(i, true);
           }
         }
       }
@@ -587,6 +597,18 @@ void handleSavePihole() {
     piholeClient.getPiHoleData(PiHoleServer, PiHolePort);
     piholeClient.getGraphData(PiHoleServer, PiHolePort);
   }
+  redirectHome();
+}
+
+void handleSaveSurf() {
+  if (!athentication()) {
+    return server.requestAuthentication();
+  }
+  SURF_ENABLED = server.hasArg("displaysurfreport");
+  SURF_API_KEY = server.arg("SurfApiKey");
+  SURF_EXTENDED_FORECAST = server.hasArg("displaysurfreport_extended");
+  minutesBetweenExtendedforecast = server.arg("extsurfdelay").toInt();
+  matrix.fillScreen(LOW); // show black
   redirectHome();
 }
 
@@ -944,6 +966,45 @@ void handleDisplay() {
     state = "ON";
   }
   displayMessage("Display is now " + state);
+}
+
+void handleSurfConfigure() {
+  if (!athentication()) {
+    return server.requestAuthentication();
+  }
+  digitalWrite(externalLight, LOW);
+  
+  server.sendHeader("Cache-Control", "no-cache, no-store");
+  server.sendHeader("Pragma", "no-cache");
+  server.sendHeader("Expires", "-1");
+  server.setContentLength(CONTENT_LENGTH_UNKNOWN);
+  server.send(200, "text/html", "");
+
+  sendHeader();
+
+  String form = FPSTR(SURF_FORM);
+  String isSurfReportChecked = "";
+  if (SURF_ENABLED) {
+    isSurfReportChecked = "checked='checked'";
+  }
+
+  String isExtSurfReportChecked = "";
+  if (SURF_EXTENDED_FORECAST) {
+    isExtSurfReportChecked = "checked='checked'";
+  }
+
+  form.replace("%SURFCHECKED%", isSurfReportChecked);
+  form.replace("%SURFKEY%", SURF_API_KEY);
+  form.replace("%EXT_SURFCHECKED", isExtSurfReportChecked);
+  form.replace("%EXT_SURF_DELAY%", String(minutesBetweenExtendedforecast));
+
+  server.sendContent(form); //Send news form
+
+  sendFooter();
+
+  server.sendContent("");
+  server.client().stop();
+  digitalWrite(externalLight, HIGH);
 }
 
 //***********************************************************************
