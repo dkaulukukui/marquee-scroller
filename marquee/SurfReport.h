@@ -62,7 +62,7 @@ class SurfReport: public JsonListener {
     void updateSurfSource(String apiKey, String spot);
     void updateSurf();
     String getSpot();
-    String format_report(int index);
+    String format_report(int index, boolean add_date = false);
 
     String cleanText(String text);
     

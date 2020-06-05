@@ -175,17 +175,20 @@ void SurfReport::endDocument() {
   //Serial.println("end document. ");
 }
 
-String SurfReport::format_report(int index){
+String SurfReport::format_report(int index, boolean add_date){
   String report_string = "";
-  String report_date = "";
+  int upper_surf_height = surf[index].wave_ht.toFloat() + 2;
+  String surf_range = surf[index].wave_ht + "-" + String(upper_surf_height) +"ft ";
 
-  //format time into readable string format
-  time_t time_raw = surf[index].report_timestamp.toInt();//convert to time_t object
-
-  report_date = day_of_week[dayOfWeek(time_raw)] + String(day(time_raw))+months[month(time_raw)]+String(year(time_raw));
-
-  report_string = report_date + " Height=" + surf[index].wave_ht + "ft(face) dir= "+surf[index].wave_dir_compass;
-
+    if(add_date == true){
+    String report_date = "";
+    //format time into readable string format
+    time_t time_raw = surf[index].report_timestamp.toInt();//convert to time_t object
+    report_date = day_of_week[dayOfWeek(time_raw)];// + String(day(time_raw))+months[month(time_raw)]+String(year(time_raw));
+    report_string = report_date +":"+ surf_range +surf[index].wave_dir_compass;
+    } else{
+      report_string = surf_range + surf[index].wave_dir_compass;
+    };
   return report_string;
 }
 

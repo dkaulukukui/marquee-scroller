@@ -100,7 +100,7 @@ ESP8266HTTPUpdateServer serverUpdater;
 SurfReport SurfReport1(SURF_API_KEY, SPOT_ID_south);
 SurfReport SurfReport2(SURF_API_KEY, SPOT_ID_north);
 const char * months[13] =  {"MMM", "JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"};
-const char * day_of_week[8] = {"DDD", "SUN ", "MON ", "TUE ", "WED ", "THU ", "FRI ", "SAT "};
+const char * day_of_week[8] = {"DDD", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
 
 static const char WEB_ACTIONS1[] PROGMEM = "<a class='w3-bar-item w3-button' href='/'><i class='fas fa-home'></i> Home</a>"
                         "<a class='w3-bar-item w3-button' href='/configure'><i class='fas fa-cog'></i> Configure</a>"
@@ -238,7 +238,7 @@ void setup() {
 
   Serial.println("matrix created");
   matrix.fillScreen(LOW); // show black
-  centerPrint("hello");
+  centerPrint("ALOHA");
 
   tone(BUZZER_PIN, 415, 500);
   delay(500 * 1.3);
@@ -444,8 +444,17 @@ void loop() {
         }
       }
       if (SURF_ENABLED) {
-        msg += " South shore surf for " + SurfReport1.format_report(0);
-        msg += " North shore surf for " + SurfReport2.format_report(0);
+        msg += " South shore: " + SurfReport1.format_report(0);
+        msg += " North shore: " + SurfReport2.format_report(0);
+
+        if (SURF_EXTENDED_FORECAST && ((getMinutesFromLastRefresh() >= minutesBetweenExtendedforecast) || lastEpoch == 0)){
+          msg += " Extended Surf forecast:";
+          
+          for(int i =1; i < 5; i++){
+            msg += " South shore for " + SurfReport1.format_report(i, true);
+            msg += " North shore for " + SurfReport2.format_report(i, true)+;
+          }
+        }
       }
 
       scrollMessage(msg);
