@@ -97,10 +97,11 @@ ESP8266WebServer server(WEBSERVER_PORT);
 ESP8266HTTPUpdateServer serverUpdater;
 
 // Surf Client
-SurfReport SurfReport1(SURF_API_KEY, SPOT_ID_south);
+//SurfReport SurfReport1(SURF_API_KEY, SPOT_ID_south);
+SurfReport SurfReport1;
 //SurfReport SurfReport2(SURF_API_KEY, SPOT_ID_north);
-const char * months[13] =  {"MMM", "JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"};
-const char * day_of_week[8] = {"DDD", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
+//const char * months[13] =  {"MMM", "JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"}; //can be removed
+//const char * day_of_week[8] = {"DDD", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"}; //can be removed
 
 static const char WEB_ACTIONS1[] PROGMEM = "<a class='w3-bar-item w3-button' href='/'><i class='fas fa-home'></i> Home</a>"
                         "<a class='w3-bar-item w3-button' href='/configure'><i class='fas fa-cog'></i> Configure</a>"
@@ -207,8 +208,8 @@ static const char OCTO_FORM[] PROGMEM = "<form class='w3-container' action='/sav
 
 static const char SURF_FORM[] PROGMEM =   "<form class='w3-container' action='/savesurf' method='get'><h2>Surf Report Configuration:</h2>"
                         "<p><input name='displaysurfreport' class='w3-check w3-margin-top' type='checkbox' %SURFCHECKED%> Display Surf Report</p>"
-                        "<label>Surf API Key</label>"
-                        "<input class='w3-input w3-border w3-margin-bottom' type='text' name='SurfApiKey' value='%SURFKEY%' maxlength='60'>"
+                        //"<label>Surf API Key</label>"
+                        //"<input class='w3-input w3-border w3-margin-bottom' type='text' name='SurfApiKey' value='%SURFKEY%' maxlength='60'>"
                         "<p><input name='displaysurfreport_extended' class='w3-check w3-margin-top' type='checkbox' %EXT_SURFCHECKED%> Display Extended Surf Report</p>"                        
                         "<p>Minutes Between Extended Forecast <input class='w3-border w3-margin-bottom' name='extsurfdelay' type='number' min='2' max='60' value='%EXT_SURF_DELAY%'></p>"
                         "<button class='w3-button w3-block w3-grey w3-section w3-padding' type='submit'>Save</button></form>";
@@ -457,21 +458,17 @@ void loop() {
       if (SURF_ENABLED) {
 
         msg += SurfReport1.RSS_get_title();
+        msg +=" as of "; // formatting
+        msg +=SurfReport1.RSS_get_date();
         msg +=' '; //add space for formatting
         msg += SurfReport1.RSS_get_warnings();
+        msg +=' '; //add space for formatting
         msg += SurfReport1.RSS_get_forecast(); 
-
-        //msg += " South shore: " + SurfReport1.format_report(0);
-       // msg += " North shore: " + SurfReport2.format_report(0);
 
         if (SURF_EXTENDED_FORECAST && ((getMinutesFromLastRefresh() >= minutesBetweenExtendedforecast) || lastEpoch == 0)){
           msg += " Extended Surf forecast:";
           msg += SurfReport1.RSS_get_extended();
 
-         /* for(int i =1; i < 5; i++){
-            msg += " South shore for " + SurfReport1.format_report(i, true);
-            msg += " North shore for " + SurfReport2.format_report(i, true);
-          }*/
         }
       }
 
@@ -613,7 +610,7 @@ void handleSaveSurf() {
     return server.requestAuthentication();
   }
   SURF_ENABLED = server.hasArg("displaysurfreport");
-  SURF_API_KEY = server.arg("SurfApiKey");
+  //SURF_API_KEY = server.arg("SurfApiKey");
   SURF_EXTENDED_FORECAST = server.hasArg("displaysurfreport_extended");
   minutesBetweenExtendedforecast = server.arg("extsurfdelay").toInt();
   matrix.fillScreen(LOW); // show black
@@ -1002,7 +999,7 @@ void handleSurfConfigure() {
   }
 
   form.replace("%SURFCHECKED%", isSurfReportChecked);
-  form.replace("%SURFKEY%", SURF_API_KEY);
+  //form.replace("%SURFKEY%", SURF_API_KEY);
   form.replace("%EXT_SURFCHECKED", isExtSurfReportChecked);
   form.replace("%EXT_SURF_DELAY%", String(minutesBetweenExtendedforecast));
 

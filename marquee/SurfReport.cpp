@@ -25,68 +25,9 @@ SOFTWARE.
 
 #define arr_len( x )  ( sizeof( x ) / sizeof( *x ) )
 
-SurfReport::SurfReport(String apiKey, String spot)
+SurfReport::SurfReport()
 {
-  myApiKey = apiKey;
-  mySpot = spot;
-}
-
-void SurfReport::updateSurfSource(String apiKey, String spot)
-{
-  myApiKey = apiKey;
-  mySpot = spot;
-}
-
-void SurfReport::updateSurf() {
-  JsonStreamingParser parser;
-  parser.setListener(this);
-  HTTPClient http;
-
-  //Replace with string for surf data to parse
-  //String apiGetData = "http://" + String(servername) + "/v2/top-headlines?sources=" + mySource + "&apiKey=" + myApiKey;
-  //String apiGetData = "https://www.surfline.com/surf-report/ala-moana-bowls/5842041f4e65fad6a7708b42";
-  String SURF_SOURCE = "http://magicseaweed.com/api/" + myApiKey + "/forecast/?spot_id=" + mySpot;//
-
-  Serial.println("Getting Surf Data");
-  Serial.println(SURF_SOURCE);
-  http.begin(SURF_SOURCE);
-  int httpCode = http.GET();
-
-  if (httpCode > 0) {  // checks for connection
-    Serial.printf("[HTTP] GET... code: %d\n", httpCode);
-    if(httpCode == HTTP_CODE_OK) {
-      // get length of document (is -1 when Server sends no Content-Length header)
-      int len = http.getSize();
-      // create buffer for read
-      char buff[128] = { 0 };
-      // get tcp stream
-      WiFiClient * stream = http.getStreamPtr();
-      // read all data from server
-      Serial.println("Start parsing...");
-      while(http.connected() && (len > 0 || len == -1)) {
-        // get available data size
-        size_t size = stream->available();
-        //Serial.print("Size of feed=");
-        //Serial.println(size);
-        if(size) {
-          // read up to 128 byte
-          int c = stream->readBytes(buff, ((size > sizeof(buff)) ? sizeof(buff) : size));
-          for(int i=0;i<c;i++) {
-            parser.parse(buff[i]); 
-          }
-            
-          if(len > 0)
-            len -= c;
-          }
-        delay(1);
-      }
-    }
-    http.end();
-  } else {
-    Serial.println("connection for surf data failed: " + String(SURF_SOURCE)); //error message if no client connect
-    Serial.println();
-    return;
-  }
+ //empty constructor
 }
 
 void SurfReport::updateSurf_RSS() {
@@ -95,17 +36,12 @@ void SurfReport::updateSurf_RSS() {
   const char* fingerprint = "07e32864918f4238a0542a2ccdc17c98798ca1d8";
   const int httpsPort = 443;
 
-  //WiFiClientSecure client;
-
-  //client.setInsecure(); //added due to https connection refused errors, we dont care about it being secure
-
   HTTPClient https;
 
   Serial.println("updating RSS surf");
   Serial.print("[HTTPS] begin...\n");
    
-  if (https.begin(host, fingerprint)) {  // HTTPS original
-  //if (https.begin(host)) {  // HTTPS  modified to solve connection refused errors 24JUL2020 0922
+  if (https.begin(host, fingerprint)) { 
 
     Serial.print("[HTTPS] GET...\n");
     // start connection and send HTTP header
@@ -120,6 +56,7 @@ void SurfReport::updateSurf_RSS() {
       if (httpCode == HTTP_CODE_OK) {
         
         RSSsurf.title = cleanText(XMLgetValue(https, "<description", 1));
+        RSSsurf.date = XMLgetValue(https, "<lastBuildDate", 1);
         RSSsurf.warnings = cleanText(XMLgetValue(https, "<description", 1));
         RSSsurf.forecast = cleanText(XMLgetValue(https, "<description", 1));
         RSSsurf.extended = cleanText(XMLgetValue(https, "<description", 1));
@@ -135,108 +72,6 @@ void SurfReport::updateSurf_RSS() {
   } else {
     Serial.printf("[HTTPS] Unable to connect\n");
   }
-}
-
-String SurfReport::getSpot()
-{
-    return mySpot;
-}
-
-void SurfReport::whitespace(char c) {
-   //Serial.println("whitespace");
-}
-
-void SurfReport::startDocument() {
-  //Serial.println("start document");
-  counterReport = 0;
-  nest_level = 0;
-  dayReport = 0;
-}
-
-void SurfReport::key(String key) {
-  //Serial.println("key: " + key);
-  currentKey = key;
-}
-
-void SurfReport::value(String value) {
-  //Serial.println("value: " + value);
-  if (dayReport == 5) {
-    // we are full so return
-    return;
-  }
-    if (nest_level == 1 && currentKey == "timestamp") {
-      //only grab one report for each day
-      if(counterReport == 0 || counterReport == 8 || counterReport == 16 || counterReport == 24 || counterReport == 32){
-        surf[dayReport].report_timestamp = value;
-      }
-    }
-    
-    if (last_LVL_Key == "combined" && nest_level == 4) //nest level 4 is the combined swell data
-    {
-     if(currentKey == "height") {
-        if(counterReport == 0 || counterReport == 8 || counterReport == 16 || counterReport == 24 || counterReport == 32){
-          surf[dayReport].wave_ht = value;
-        }
-     }
-      else if (currentKey == "period") {
-        if(counterReport == 0 || counterReport == 8 || counterReport == 16 || counterReport == 24 || counterReport == 32){
-          surf[dayReport].wave_period = value;
-        }
-     }
-      else if (currentKey == "direction") {
-        if(counterReport == 0 || counterReport == 8 || counterReport == 16 || counterReport == 24 || counterReport == 32){
-          surf[dayReport].wave_dir_deg = value;
-        }
-      }
-      else if (currentKey == "compassDirection") {
-        if(counterReport == 0 || counterReport == 8 || counterReport == 16 || counterReport == 24 || counterReport == 32){
-          surf[dayReport].wave_dir_compass = value;
-          Serial.println(format_report(dayReport));
-          dayReport++;          
-        }
-        counterReport++;
-      }
-    }  
-  //Serial.println(currentKey + "=" + value);
-}
-
-void SurfReport::endArray() {
-  //Serial.println("end array. ");
-}
-
-void SurfReport::endObject() {
-  //Serial.println("end object. ");
-  nest_level--;
-}
-void SurfReport::startArray() {
- // Serial.println("start array. ");
-}
-
-void SurfReport::startObject() {
-  //Serial.println("start object. ");
-  last_LVL_Key = currentKey; //save last level key for nested filtering
-  nest_level++;
-}
-
-void SurfReport::endDocument() {
-  //Serial.println("end document. ");
-}
-
-String SurfReport::format_report(int index, boolean add_date){
-  String report_string = "";
-  int upper_surf_height = surf[index].wave_ht.toFloat() + 2;
-  String surf_range = surf[index].wave_ht + "-" + String(upper_surf_height) +"ft ";
-
-    if(add_date == true){
-    String report_date = "";
-    //format time into readable string format
-    time_t time_raw = surf[index].report_timestamp.toInt();//convert to time_t object
-    report_date = day_of_week[dayOfWeek(time_raw)];// + String(day(time_raw))+months[month(time_raw)]+String(year(time_raw));
-    report_string = report_date +":"+ surf_range +surf[index].wave_dir_compass;
-    } else{
-      report_string = surf_range + surf[index].wave_dir_compass;
-    };
-  return report_string;
 }
 
 String SurfReport::cleanText(String text) {
@@ -284,6 +119,10 @@ String SurfReport::cleanText(String text) {
   text.replace("«", "'");
   text.replace("&#44;", ",");
   text.replace("\n", " ");
+  text.replace("NOTE: Please check with local authorities regarding beach closures.", "");
+  text.replace("Surf heights are forecast heights of the face, or front, of waves. The surf forecast is based on the significant wave height, the average height of the one third largest waves, at the locations of the largest breakers. Some waves may be more than twice as high as the significant wave height. Expect to encounter rip currents in or near any surf zone.", "");
+  text.replace("Surf along ", "");
+  text.replace("facing shores ", "");
   return text;
 }
 
@@ -346,4 +185,9 @@ String SurfReport::RSS_get_forecast()
 String SurfReport::RSS_get_extended()
 {
     return this->RSSsurf.extended;
+}
+
+String SurfReport::RSS_get_date()
+{
+    return this->RSSsurf.date;
 }

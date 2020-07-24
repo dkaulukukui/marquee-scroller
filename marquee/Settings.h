@@ -121,9 +121,9 @@ String OTA_Password = "";     // Set an OTA password here -- leave blank if you 
 
 //Surf Report 
 boolean SURF_ENABLED = true;
-String SURF_API_KEY = "723e0b9aaf2eae8d629f9996a93317eb"; //
-String SPOT_ID_south = "661";//south shore oahu (ala moana)
-String SPOT_ID_north = "616";//north shore oahu (pipeline)
+//String SURF_API_KEY = "723e0b9aaf2eae8d629f9996a93317eb"; //
+//String SPOT_ID_south = "661";//south shore oahu (ala moana)
+//String SPOT_ID_north = "616";//north shore oahu (pipeline)
 boolean SURF_EXTENDED_FORECAST = true;
 int minutesBetweenExtendedforecast = 10;
 
