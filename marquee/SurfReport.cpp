@@ -119,8 +119,8 @@ String SurfReport::cleanText(String text) {
   text.replace("«", "'");
   text.replace("&#44;", ",");
   text.replace("\n", " ");
-  text.replace("NOTE: Please check with local authorities regarding beach closures.", "");
-  text.replace("Surf heights are forecast heights of the face, or front, of waves. The surf forecast is based on the significant wave height, the average height of the one third largest waves, at the locations of the largest breakers. Some waves may be more than twice as high as the significant wave height. Expect to encounter rip currents in or near any surf zone.", "");
+  text.replace("NOTE: Please check with local authorities regarding beach closures.", " ");
+  text.replace("Surf heights are forecast heights of the face, or front, of waves. The surf forecast is based on the significant wave height, the average height of the one third largest waves, at the locations of the largest breakers. Some waves may be more than twice as high as the significant wave height. Expect to encounter rip currents in or near any surf zone.", " ");
   text.replace("Surf along ", "");
   text.replace("facing shores ", "");
   return text;
