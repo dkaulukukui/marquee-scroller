@@ -457,6 +457,7 @@ void loop() {
       if (SURF_ENABLED) {
 
         msg += SurfReport1.RSS_get_title();
+        msg +=' '; //add space for formatting
         msg += SurfReport1.RSS_get_warnings();
         msg += SurfReport1.RSS_get_forecast(); 
 

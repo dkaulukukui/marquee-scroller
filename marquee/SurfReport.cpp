@@ -118,13 +118,11 @@ void SurfReport::updateSurf_RSS() {
 
       // file found at server
       if (httpCode == HTTP_CODE_OK) {
-
-        //int len = https.getSize();
         
-        RSSsurf.title = XMLgetValue(https, "<description", 1);
-        RSSsurf.warnings = XMLgetValue(https, "<description", 1);
-        RSSsurf.forecast = XMLgetValue(https, "<description", 1);
-        RSSsurf.extended = XMLgetValue(https, "<description", 1);
+        RSSsurf.title = cleanText(XMLgetValue(https, "<description", 1));
+        RSSsurf.warnings = cleanText(XMLgetValue(https, "<description", 1));
+        RSSsurf.forecast = cleanText(XMLgetValue(https, "<description", 1));
+        RSSsurf.extended = cleanText(XMLgetValue(https, "<description", 1));
 
         //Serial.println();
         Serial.print("[HTTPS] connection closed or file end.\n");
@@ -284,6 +282,8 @@ String SurfReport::cleanText(String text) {
   text.replace("ß", "ss");
   text.replace("»", "'");
   text.replace("«", "'");
+  text.replace("&#44;", ",");
+  text.replace("\n", "");
   return text;
 }
 
