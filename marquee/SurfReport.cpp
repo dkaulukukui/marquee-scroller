@@ -283,7 +283,7 @@ String SurfReport::cleanText(String text) {
   text.replace("»", "'");
   text.replace("«", "'");
   text.replace("&#44;", ",");
-  text.replace("\n", "");
+  text.replace("\n", " ");
   return text;
 }
 
