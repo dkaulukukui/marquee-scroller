@@ -57,12 +57,32 @@ class SurfReport: public JsonListener {
 
     surffeed surf[5]; //store one report per day
 
+    typedef struct {
+      String title;
+      String warnings;
+      String forecast;
+      String extended;
+      String date;
+    } RSSsurffeed;
+
+    
+    RSSsurffeed RSSsurf;
+
+    String XMLgetValue(HTTPClient &http, String key, int skip);
+
  public:
+
     SurfReport(String apiKey, String spot);
     void updateSurfSource(String apiKey, String spot);
     void updateSurf();
+    void updateSurf_RSS();
     String getSpot();
     String format_report(int index, boolean add_date = false);
+
+    String RSS_get_title();
+    String RSS_get_warnings();
+    String RSS_get_forecast();
+    String RSS_get_extended(); 
 
     String cleanText(String text);
     

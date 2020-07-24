@@ -98,7 +98,7 @@ ESP8266HTTPUpdateServer serverUpdater;
 
 // Surf Client
 SurfReport SurfReport1(SURF_API_KEY, SPOT_ID_south);
-SurfReport SurfReport2(SURF_API_KEY, SPOT_ID_north);
+//SurfReport SurfReport2(SURF_API_KEY, SPOT_ID_north);
 const char * months[13] =  {"MMM", "JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"};
 const char * day_of_week[8] = {"DDD", "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
 
@@ -363,8 +363,9 @@ void loop() {
   if ((getMinutesFromLastRefresh() >= minutesBetweenDataRefresh) || lastEpoch == 0) {
     getWeatherData();
     if (SURF_ENABLED) {  //update surf report at the same time as weather data 
-        SurfReport1.updateSurf();
-        SurfReport2.updateSurf();
+        //SurfReport1.updateSurf();
+        //SurfReport2.updateSurf();
+        SurfReport1.updateSurf_RSS();
     }
   }
   checkDisplay(); // this will see if we need to turn it on or off for night mode.
@@ -454,16 +455,22 @@ void loop() {
         }
       }
       if (SURF_ENABLED) {
-        msg += " South shore: " + SurfReport1.format_report(0);
-        msg += " North shore: " + SurfReport2.format_report(0);
+
+        msg += SurfReport1.RSS_get_title();
+        msg += SurfReport1.RSS_get_warnings();
+        msg += SurfReport1.RSS_get_forecast(); 
+
+        //msg += " South shore: " + SurfReport1.format_report(0);
+       // msg += " North shore: " + SurfReport2.format_report(0);
 
         if (SURF_EXTENDED_FORECAST && ((getMinutesFromLastRefresh() >= minutesBetweenExtendedforecast) || lastEpoch == 0)){
           msg += " Extended Surf forecast:";
-          
-          for(int i =1; i < 5; i++){
+          msg += SurfReport1.RSS_get_extended();
+
+         /* for(int i =1; i < 5; i++){
             msg += " South shore for " + SurfReport1.format_report(i, true);
             msg += " North shore for " + SurfReport2.format_report(i, true);
-          }
+          }*/
         }
       }
 

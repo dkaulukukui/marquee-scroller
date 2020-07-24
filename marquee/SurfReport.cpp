@@ -45,7 +45,7 @@ void SurfReport::updateSurf() {
   //Replace with string for surf data to parse
   //String apiGetData = "http://" + String(servername) + "/v2/top-headlines?sources=" + mySource + "&apiKey=" + myApiKey;
   //String apiGetData = "https://www.surfline.com/surf-report/ala-moana-bowls/5842041f4e65fad6a7708b42";
-  String SURF_SOURCE = "http://magicseaweed.com/api/" + myApiKey + "/forecast/?spot_id=" + mySpot +"&fields=timestamp,swell.components.combined.*";//
+  String SURF_SOURCE = "http://magicseaweed.com/api/" + myApiKey + "/forecast/?spot_id=" + mySpot;//
 
   Serial.println("Getting Surf Data");
   Serial.println(SURF_SOURCE);
@@ -89,6 +89,56 @@ void SurfReport::updateSurf() {
   }
 }
 
+void SurfReport::updateSurf_RSS() {
+
+  const char* host = "https://www.weather.gov/source/hfo/xml/Surf.xml";
+  const char* fingerprint = "07e32864918f4238a0542a2ccdc17c98798ca1d8";
+  const int httpsPort = 443;
+
+  //WiFiClientSecure client;
+
+  //client.setInsecure(); //added due to https connection refused errors, we dont care about it being secure
+
+  HTTPClient https;
+
+  Serial.println("updating RSS surf");
+  Serial.print("[HTTPS] begin...\n");
+   
+  if (https.begin(host, fingerprint)) {  // HTTPS original
+  //if (https.begin(host)) {  // HTTPS  modified to solve connection refused errors 24JUL2020 0922
+
+    Serial.print("[HTTPS] GET...\n");
+    // start connection and send HTTP header
+    int httpCode = https.GET();
+
+    // httpCode will be negative on error
+    if (httpCode > 0) {
+      // HTTP header has been send and Server response header has been handled
+      Serial.printf("[HTTPS] GET... code: %d\n", httpCode);
+
+      // file found at server
+      if (httpCode == HTTP_CODE_OK) {
+
+        //int len = https.getSize();
+        
+        RSSsurf.title = XMLgetValue(https, "<description", 1);
+        RSSsurf.warnings = XMLgetValue(https, "<description", 1);
+        RSSsurf.forecast = XMLgetValue(https, "<description", 1);
+        RSSsurf.extended = XMLgetValue(https, "<description", 1);
+
+        //Serial.println();
+        Serial.print("[HTTPS] connection closed or file end.\n");
+      }
+    } else {
+      Serial.printf("[HTTPS] GET... failed, error: %s\n", https.errorToString(httpCode).c_str());
+    }
+
+    https.end();
+  } else {
+    Serial.printf("[HTTPS] Unable to connect\n");
+  }
+}
+
 String SurfReport::getSpot()
 {
     return mySpot;
@@ -114,7 +164,6 @@ void SurfReport::value(String value) {
   //Serial.println("value: " + value);
   if (dayReport == 5) {
     // we are full so return
-    //Serial.println("Returning from updateSurf");
     return;
   }
     if (nest_level == 1 && currentKey == "timestamp") {
@@ -144,7 +193,7 @@ void SurfReport::value(String value) {
       else if (currentKey == "compassDirection") {
         if(counterReport == 0 || counterReport == 8 || counterReport == 16 || counterReport == 24 || counterReport == 32){
           surf[dayReport].wave_dir_compass = value;
-          //Serial.println(format_report(dayReport));
+          Serial.println(format_report(dayReport));
           dayReport++;          
         }
         counterReport++;
@@ -238,3 +287,63 @@ String SurfReport::cleanText(String text) {
   return text;
 }
 
+String SurfReport::XMLgetValue(HTTPClient &http, String key, int skip /*, int get*/) {
+  bool found = false, look = false;
+  int ind = 0;   //character counter for the key
+  String ret_str = "";
+
+  int len = http.getSize();
+  char char_buff[1];
+  WiFiClient * stream = http.getStreamPtr();
+  while (http.connected() && (len > 0 || len == -1)) {
+    size_t size = stream->available();
+    //Serial.print(char_buff[0]); //debug to print chars as they come in
+    if (size) {
+      int c = stream->readBytes(char_buff, ((size > sizeof(char_buff)) ? sizeof(char_buff) : size));
+      if (len > 0)
+        len -= c;
+      if (found) {
+        if (char_buff[0] == 60 /*get <= 0*/)
+          break;
+        if (skip == 0) {
+          ret_str += char_buff[0];
+         // get --;
+        } else
+          skip --;
+      }
+      else if ((!look) && (char_buff[0] == key[0])) {  //Search for first character in key
+        look = true;  //Set look bool to indicate currently comparing key
+        ind = 1;  //set key search index to 1
+      } else if (look && (char_buff[0] == key[ind])) {  //if looking and current char matches key 
+        ind ++; //increment key search index
+        if (ind == key.length()) {  //successfully matched the key
+          found = true;  //only set found if at correct instance
+        }
+      } else if (look && (char_buff[0] != key[ind])) { //if looking and current char doesnt match key then reset
+        ind = 0;
+        look = false;
+      }
+    }
+  }
+  return ret_str;
+}
+
+String SurfReport::RSS_get_title()
+{
+    return this->RSSsurf.title;
+}
+
+String SurfReport::RSS_get_warnings()
+{
+    return this->RSSsurf.warnings;
+}
+
+String SurfReport::RSS_get_forecast()
+{
+    return this->RSSsurf.forecast;
+}
+
+String SurfReport::RSS_get_extended()
+{
+    return this->RSSsurf.extended;
+}
