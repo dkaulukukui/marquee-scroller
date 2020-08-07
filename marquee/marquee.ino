@@ -238,6 +238,7 @@ void setup() {
   Serial.println("Number of LED Displays: " + String(numberOfHorizontalDisplays));
   // initialize dispaly
   matrix.setIntensity(0); // Use a value between 0 and 15 for brightness
+  //matrix.setFont(&FreeMono9pt7b); //change font doesnt work, characters are off screen, changing cursor location doesnt fix
 
   int maxPos = numberOfHorizontalDisplays * numberOfVerticalDisplays;
   for (int i = 0; i < maxPos; i++) {

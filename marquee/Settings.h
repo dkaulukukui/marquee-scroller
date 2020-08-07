@@ -54,6 +54,8 @@ SOFTWARE.
 #include "PiHoleClient.h"
 #include "SurfReport.h"  
 
+#include <Fonts/FreeMono9pt7b.h>
+
 //******************************
 // Start Settings
 //******************************
@@ -71,8 +73,8 @@ const boolean WEBSERVER_ENABLED = true;  // Device will provide a web interface 
 boolean IS_BASIC_AUTH = false;  // Use Basic Authorization for Configuration security on Web Interface
 char* www_username = "admin";  // User account for the Web Interface
 char* www_password = "password";  // Password for the Web Interface
-int minutesBetweenDataRefresh = 15;  // Time in minutes between data refresh (default 15 minutes)
-int minutesBetweenScrolling = 1; // Time in minutes between scrolling data (default 1 minutes and max is 10)
+int minutesBetweenDataRefresh = 60;  // Time in minutes between data refresh (default 15 minutes)
+int minutesBetweenScrolling = 5; // Time in minutes between scrolling data (default 1 minutes and max is 10)
 int displayScrollSpeed = 25; // In milliseconds -- Configurable by the web UI (slow = 35, normal = 25, fast = 15, very fast = 5)
 boolean flashOnSeconds = true; // when true the : character in the time will flash on and off as a seconds indicator
 

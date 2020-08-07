@@ -40,7 +40,7 @@ private:
 
     RSSsurffeed RSSsurf;
 
-    String XMLgetValue(HTTPClient &http, String key, int skip);
+    String XMLgetValue(HTTPClient &http, String key, int skip, char end_of_value);
 
 public:
     SurfReport(); //empty constructor

@@ -55,11 +55,11 @@ void SurfReport::updateSurf_RSS() {
       // file found at server
       if (httpCode == HTTP_CODE_OK) {
         
-        RSSsurf.title = cleanText(XMLgetValue(https, "<description", 1));
-        RSSsurf.date = XMLgetValue(https, "<lastBuildDate", 1);
-        RSSsurf.warnings = cleanText(XMLgetValue(https, "<description", 1));
-        RSSsurf.forecast = cleanText(XMLgetValue(https, "<description", 1));
-        RSSsurf.extended = cleanText(XMLgetValue(https, "<description", 1));
+        RSSsurf.title = cleanText(XMLgetValue(https, "<description", 1, '<'));
+        RSSsurf.date = XMLgetValue(https, "<lastBuildDate", 1, '<');
+        RSSsurf.warnings = cleanText(XMLgetValue(https, "<description", 1, '<'));
+        RSSsurf.forecast = cleanText(XMLgetValue(https, "<description", 1, '<'));
+        RSSsurf.extended = cleanText(XMLgetValue(https, "<description", 1, '<'));
 
         //Serial.println();
         Serial.print("[HTTPS] connection closed or file end.\n");
@@ -121,12 +121,12 @@ String SurfReport::cleanText(String text) {
   text.replace("\n", " ");
   text.replace("NOTE: Please check with local authorities regarding beach closures.", " ");
   text.replace("Surf heights are forecast heights of the face, or front, of waves. The surf forecast is based on the significant wave height, the average height of the one third largest waves, at the locations of the largest breakers. Some waves may be more than twice as high as the significant wave height. Expect to encounter rip currents in or near any surf zone.", " ");
-  text.replace("Surf along ", "");
-  text.replace("facing shores ", "");
+  //text.replace("Surf along ", "");
+  //text.replace("facing shores ", "");
   return text;
 }
 
-String SurfReport::XMLgetValue(HTTPClient &http, String key, int skip /*, int get*/) {
+String SurfReport::XMLgetValue(HTTPClient &http, String key, int skip, char end_of_value) {
   bool found = false, look = false;
   int ind = 0;   //character counter for the key
   String ret_str = "";
@@ -142,7 +142,7 @@ String SurfReport::XMLgetValue(HTTPClient &http, String key, int skip /*, int ge
       if (len > 0)
         len -= c;
       if (found) {
-        if (char_buff[0] == 60 /*get <= 0*/)
+        if (char_buff[0] == end_of_value) //end of value exit function
           break;
         if (skip == 0) {
           ret_str += char_buff[0];
